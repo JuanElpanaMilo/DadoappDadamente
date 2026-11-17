@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Cubo de las 1000 Experiencias</title>
+  <style>
+    :root {
+      --primary: #4CAF50;
+      --bg: #FFF9E6;
+    }
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+      background-color: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+      touch-action: manipulation;
+    }
+    h1 {
+      font-size: 28px;
+      color: #2E7D32;
+      text-align: center;
+      margin: 15px 0 5px;
+    }
+    p.instruccion {
+      font-size: 16px;
+      margin: 0 0 20px;
+      color: #555;
+    }
+    /* Selector de Áreas (Intercambiable) */
+    .selector-areas {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 600px;
+      width: 90%;
+      margin-bottom: 25px;
+    }
+    .btn-area {
+      border: none;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s, border 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-area:active { transform: scale(0.95); }
+    .btn-area.activo {
+      outline: 4px solid #333;
+    }
+    /* Colores por área */
+    #area-1 { background-color: #FF5722; } /* Siento */
+    #area-2 { background-color: #03A9F4; } /* Descubro */
+    #area-3 { background-color: #4CAF50; } /* Exploro */
+    #area-4 { background-color: #E040FB; } /* Creo */
+    #area-5 { background-color: #FF9800; } /* Cuento */
+    #area-6 { background-color: #2979FF; } /* Me muevo */
+
+    /* Contenedor del Dado */
+    .contenedor-dado {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-grow: 1;
+      width: 300%;
+    }
+    /* El Dado en pantalla */
+    .dado {
+      width: 300px;
+      height: 300px;
+      background-color: white;
+      border-radius: 24px;
+      border: 8px solid #333;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.1s;
+      margin-bottom: 15px;
+    }
+    .dado:active { transform: scale(0.95); }
+    .dado-contenido {
+      font-size: 80px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 95px; /* Altura fija para evitar saltos entre emojis e imágenes */
+    }
+    /* Estilo para cuando se usa una imagen en lugar de emoji */
+    .dado-contenido img {
+      max-width: 150px;
+      max-height: 150px;
+      object-fit: contain;
+      pointer-events: none;
+    }
+    .dado-texto {
+      font-size: 35px;
+      font-weight: bold;
+      text-transform: uppercase;
+      text-align: center;
+      margin-top: 10px;
+      padding: 0 10px;
+    }
+    /* Animación de Giro */
+    @keyframes girar {
+      0% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.1) rotate(-15deg); }
+      50% { transform: scale(1.1) rotate(15deg); }
+      75% { transform: scale(1.1) rotate(-10deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .girando {
+      animation: girar 0.6s ease-in-out;
+    }
+    /* Sonido de lanzamiento */
+    .resultado-banner {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      height: 30px;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎲 Dadamente</h1>
+  <p class="instruccion">1. Elige un área interactiva del juego </p>
+
+  <!-- Botones de áreas intercambiables -->
+  <div class="selector-areas">
+    <button id="area-1" class="btn-area activo" onclick="cambiarArea(1)">
+      <span>😊 1. Siento</span><small>Mis Emociones</small>
+    </button>
+    <button id="area-2" class="btn-area" onclick="cambiarArea(2)">
+      <span>🔢 2. Descubro</span><small>Matemáticas</small>
+    </button>
+    <button id="area-3" class="btn-area" onclick="cambiarArea(3)">
+      <span>🔍 3. Exploro</span><small>Pequeños Científicos</small>
+    </button>
+    <button id="area-4" class="btn-area" onclick="cambiarArea(4)">
+      <span>🎨 4. Creo</span><small>Arte y Creatividad</small>
+    </button>
+    <button id="area-5" class="btn-area" onclick="cambiarArea(5)">
+      <span>📖 5. Cuento</span><small>Me Comunico</small>
+    </button>
+    <button id="area-6" class="btn-area" onclick="cambiarArea(6)">
+      <span>🏃 6. Me muevo</span><small>Mi Cuerpo</small>
+    </button>
+  </div>
+
+  <p class="instruccion">2. ¡Toca el dado para lanzarlo!</p>
+
+  <!-- Área de Dado -->
+  <div class="contenedor-dado">
+    <div id="dado-pantalla" class="dado" onclick="lanzarDado()">
+      <div id="dado-icono" class="dado-contenido">😊</div>
+      <div id="dado-nombre" class="dado-texto">Feliz</div>
+    </div>
+    <div id="resultado" class="resultado-banner">¡Tócame para empezar!</div>
+  </div>
+
+  <script>
+    const bancoDeCaras = {
+      1: [ // 1. Siento (Emociones)
+        { icono: "😊", texto: "¡Feliz!" },
+        { icono: "😢", texto: "¡Triste!" },
+        { icono: "😡", texto: "¡Enfadado!" },
+        { icono: "😱", texto: "¡Asustado!" },
+        { icono: "😮", texto: "¡Sorprendido!" },
+        { icono: "😴", texto: "¡Cansado!" }
+      ],
+      2: [ // 2. Descubro (Matemáticas y formas)
+        { icono: "🔴", texto: "¡Círculo!" },
+        { icono: "🟦", texto: "¡Cuadrado!" },
+        { icono: "🔺", texto: "¡Triángulo!" },
+        { icono: "⭐", texto: "¡Estrella!" },
+        { icono: "1️⃣", texto: "¡Número 1!" },
+        { icono: "2️⃣", texto: "¡Número 2!" },
+        { icono: "3️⃣", texto: "¡Número 3!" },
+        { icono: "4️⃣", texto: "¡Número 4!" },
+        { icono: "5️⃣", texto: "¡Número 5!" }
+      ],
+      3: [ // 3. Exploro (Ciencia y naturaleza)
+        { icono: "🌿", texto: "¡Una Hoja!" },
+        { icono: "🐜", texto: "¡Hormiga!" },
+        { icono: "💧", texto: "¡Agua!" },
+        { icono: "🦋", texto: "¡Mariposa!" },
+        { icono: "🌻", texto: "¡Flor!" },
+        { icono: "🐌", texto: "¡Caracol!" }
+      ],
+      4: [ // 4. Creo (Arte y creatividad)
+        { icono: "🎨", texto: "¡A Pintar!" },
+        { icono: "🎭", texto: "¡Hacer gestos!" },
+        { icono: "🎵", texto: "¡Cantar!" },
+        // REEMPLAZA EL ENLACE DE ABAJO POR LA URL O RUTA DE TU IMAGEN DE PLASTILINA
+        { imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQep1VOe9W5K9PHCgXtzj3iXAWTYLdzyZw9k84DVxeU_Q&s=10", texto: "¡Artes plásticas!" },
+        { icono: "✏️", texto: "¡Dibujar!" },
+        { icono: "✂️", texto: "¡Recortar!" }
+      ],
+      5: [ // 5. Cuento (Lenguaje y comunicación)
+        { icono: "🦁", texto: "El León" },
+        { icono: "🏰", texto: "El Castillo" },
+        { icono: "🧙", texto: "El Mago" },
+        { icono: "🚀", texto: "Un Cohete" },
+        { icono: "🐻", texto: "Un Oso" },
+        { icono: "🚢", texto: "El Barco" },
+        { icono: "🍳", texto: "Cocinar" },
+        { icono: "🎮", texto: "Jugar" },
+        { icono: "🏗️", texto: "Construir" },
+      ],
+      6: [ // 6. Me muevo (Motricidad y cuerpo)
+        { icono: "🦘", texto: "¡Salta!" },
+        { icono: "👏", texto: "¡Aplaude!" },
+        { icono: "💃", texto: "¡Baila!" },
+        { icono: "🚶", texto: "¡Camina!" },
+        { icono: "🥶", texto: "¡Congelado!" },
+        { icono: "💤", texto: "¡Dormir!" }
+      ]
+    };
+
+    let areaActual = 1;
+    let girando = false;
+
+    // Función auxiliar para dibujar tanto emojis como imágenes
+    function mostrarCara(cara) {
+      const iconoEl = document.getElementById('dado-icono');
+      const nombreEl = document.getElementById('dado-nombre');
+
+      if (cara.imagen) {
+        iconoEl.innerHTML = `<img src="${cara.imagen}" alt="${cara.texto}">`;
+      } else {
+        iconoEl.textContent = cara.icono;
+      }
+      nombreEl.textContent = cara.texto;
+    }
+
+    // Cambiar la cara o categoría de juego
+    function cambiarArea(num) {
+      if (girando) return;
+      areaActual = num;
+      
+      document.querySelectorAll('.btn-area').forEach(btn => btn.classList.remove('activo'));
+      document.getElementById(`area-${num}`).classList.add('activo');
+      
+      const caraInicial = bancoDeCaras[num][0];
+      mostrarCara(caraInicial);
+      document.getElementById('resultado').textContent = "¡Cambiado! Lanza el dado.";
+    }
+
+    // Efecto de giro y selección aleatoria
+    function lanzarDado() {
+      if (girando) return;
+      girando = true;
+
+      const dado = document.getElementById('dado-pantalla');
+      const resultadoEl = document.getElementById('resultado');
+
+      dado.classList.add('girando');
+      resultadoEl.textContent = "🎲 Girando...";
+
+      let vueltas = 0;
+      const caras = bancoDeCaras[areaActual];
+
+      const intervalo = setInterval(() => {
+        const azar = caras[Math.floor(Math.random() * caras.length)];
+        mostrarCara(azar);
+        vueltas++;
+
+        if (vueltas >= 8) {
+          clearInterval(intervalo);
+          
+          // Resultado Final
+          const final = caras[Math.floor(Math.random() * caras.length)];
+          mostrarCara(final);
+          resultadoEl.textContent = `¡Salió: ${final.texto}!`;
+          
+          dado.classList.remove('girando');
+          reproducirVoz(final.texto);
+
+          girando = false;
+        }
+      }, 100);
+    }
+
+    // Sintetizador de voz integrado
+    function reproducirVoz(mensaje) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const voz = new SpeechSynthesisUtterance(mensaje);
+        voz.lang = "es-ES";
+        voz.rate = 0.9;
+        window.speechSynthesis.speak(voz);
+      }
+    }
+  </script>
+</body>
+</html>
